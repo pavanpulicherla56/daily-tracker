@@ -26,10 +26,7 @@
             line-height: 1.5;
         }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1100px; margin: 0 auto; }
 
         header {
             background: var(--card);
@@ -56,6 +53,24 @@
             font-size: 0.9rem;
         }
 
+        .sync-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-export { background: #fff; color: var(--text-main); }
+        .btn-import { background: var(--primary); color: #fff; border: none; }
+
         .charts-grid {
             display: grid;
             grid-template-columns: 1.5fr 1fr;
@@ -74,8 +89,6 @@
             border-radius: 16px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.02);
             border: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
         }
 
         h2 {
@@ -84,7 +97,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: var(--text-main);
         }
 
         .overall-badge {
@@ -105,20 +117,8 @@
 
         .task-row:last-child { border-bottom: none; }
 
-        .task-label { font-size: 0.95rem; font-weight: 500; }
-        
-        input[type="range"] {
-            width: 120px;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--success);
-            cursor: pointer;
-        }
+        input[type="range"] { width: 120px; accent-color: var(--primary); cursor: pointer; }
+        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--success); cursor: pointer; }
 
         .perc-val {
             font-size: 0.85rem;
@@ -128,11 +128,7 @@
             text-align: right;
         }
 
-        .supp-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
+        .supp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
         .supp-item {
             display: flex;
@@ -144,9 +140,7 @@
             border-radius: 8px;
         }
 
-        @media (max-width: 768px) {
-            .charts-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -155,7 +149,11 @@
     <header>
         <div class="header-top">
             <div class="date-badge" id="current-date">--</div>
-            <div style="color: var(--text-muted); font-size: 0.8rem;">Auto-reset at 12:01 AM</div>
+            <div class="sync-buttons">
+                <button class="btn btn-export" onclick="exportData()">Export Data</button>
+                <button class="btn btn-import" onclick="document.getElementById('importFile').click()">Import Data</button>
+                <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+            </div>
         </div>
         <div class="charts-grid">
             <div style="height: 220px;"><canvas id="weeklyTotalChart"></canvas></div>
@@ -166,86 +164,30 @@
     <div class="dashboard-grid">
         <div class="card">
             <h2>Fitness <span id="fitness-total" class="overall-badge">0%</span></h2>
-            <div class="task-row">
-                <span class="task-label">Focus Exercises</span>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <input type="range" class="fitness-input" data-key="fit_focus" value="0">
-                    <span class="perc-val">0%</span>
-                </div>
-            </div>
-            <div class="task-row">
-                <span class="task-label">Growth Addition</span>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <input type="range" class="fitness-input" data-key="fit_growth" value="0">
-                    <span class="perc-val">0%</span>
-                </div>
-            </div>
-            <div class="task-row">
-                <span class="task-label">Abs</span>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <input type="range" class="fitness-input" data-key="fit_abs" value="0">
-                    <span class="perc-val">0%</span>
-                </div>
-            </div>
-            <div class="task-row">
-                <span class="task-label">10k Steps</span>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <input type="range" class="fitness-input" data-key="fit_steps" value="0">
-                    <span class="perc-val">0%</span>
-                </div>
-            </div>
+            <div class="task-row"><span>Focus Exercises</span><input type="range" class="fitness-input" data-key="fit_focus" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row"><span>Growth Addition</span><input type="range" class="fitness-input" data-key="fit_growth" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row"><span>Abs</span><input type="range" class="fitness-input" data-key="fit_abs" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row"><span>10k Steps</span><input type="range" class="fitness-input" data-key="fit_steps" value="0"><span class="perc-val">0%</span></div>
         </div>
 
         <div class="card">
             <h2>Work & Startup <span id="work-startup-total" class="overall-badge">0%</span></h2>
-            <div class="task-row">
-                <span class="task-label">Work Progress</span>
-                <input type="range" id="work-input" value="0">
-                <span class="perc-val">0%</span>
-            </div>
-            <div class="task-row" style="margin-top:10px; border-top: 1px solid var(--border); padding-top:15px;">
-                <span class="task-label">Startup: Hanu</span>
-                <input type="range" class="startup-input" data-key="st_hanu" value="0">
-                <span class="perc-val">0%</span>
-            </div>
-            <div class="task-row">
-                <span class="task-label">Startup: Setu</span>
-                <input type="range" class="startup-input" data-key="st_setu" value="0">
-                <span class="perc-val">0%</span>
-            </div>
+            <div class="task-row"><span>Work Progress</span><input type="range" id="work-input" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row" style="margin-top:10px; border-top: 1px solid var(--border); padding-top:15px;"><span>Startup: Hanu</span><input type="range" class="startup-input" data-key="st_hanu" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row"><span>Startup: Setu</span><input type="range" class="startup-input" data-key="st_setu" value="0"><span class="perc-val">0%</span></div>
         </div>
 
         <div class="card">
             <h2>Skills <span id="skill-total" class="overall-badge">0%</span></h2>
-            <div class="task-row">
-                <span class="task-label">AI Skills</span>
-                <input type="range" class="skill-input" data-key="sk_ai" value="0">
-                <span class="perc-val">0%</span>
-            </div>
-            <div class="task-row">
-                <span class="task-label">CPU Architecture</span>
-                <input type="range" class="skill-input" data-key="sk_cpu" value="0">
-                <span class="perc-val">0%</span>
-            </div>
+            <div class="task-row"><span>AI Skills</span><input type="range" class="skill-input" data-key="sk_ai" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row"><span>CPU Architecture</span><input type="range" class="skill-input" data-key="sk_cpu" value="0"><span class="perc-val">0%</span></div>
         </div>
 
         <div class="card">
-            <h2>Lifestyle Metrics</h2>
-            <div class="task-row">
-                <span class="task-label">Family Time (2h)</span>
-                <input type="range" id="family-input" value="0">
-                <span class="perc-val">0%</span>
-            </div>
-            <div class="task-row">
-                <span class="task-label">Sleep (7h)</span>
-                <input type="range" id="sleep-input" value="0">
-                <span class="perc-val">0%</span>
-            </div>
-            <div class="task-row">
-                <span class="task-label">Food Quality</span>
-                <input type="range" id="food-input" value="100">
-                <span class="perc-val">100%</span>
-            </div>
+            <h2>Lifestyle</h2>
+            <div class="task-row"><span>Family Time (2h)</span><input type="range" id="family-input" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row"><span>Sleep (7h)</span><input type="range" id="sleep-input" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row"><span>Food Quality</span><input type="range" id="food-input" value="100"><span class="perc-val">100%</span></div>
         </div>
 
         <div class="card">
@@ -263,7 +205,7 @@
 </div>
 
 <script>
-    let history = JSON.parse(localStorage.getItem('trackerHistoryV3')) || [];
+    let history = JSON.parse(localStorage.getItem('trackerHistoryV4')) || [];
     let totalChart, categoryChart;
 
     function init() {
@@ -274,40 +216,69 @@
         updateUI();
     }
 
+    // --- REFRESH & STORAGE ---
     function checkDateRefresh() {
-        const lastDate = localStorage.getItem('lastSavedDateV3');
+        const lastDate = localStorage.getItem('lastSavedDateV4');
         const today = new Date().toLocaleDateString();
-
         if (lastDate && lastDate !== today) {
-            const dailyTotal = calculateGrandTotal();
-            history.push({ date: lastDate, score: dailyTotal });
+            history.push({ date: lastDate, score: calculateGrandTotal() });
             if (history.length > 7) history.shift();
-            localStorage.setItem('trackerHistoryV3', JSON.stringify(history));
-            localStorage.removeItem('currentDayDataV3');
-            resetInputs();
+            localStorage.setItem('trackerHistoryV4', JSON.stringify(history));
+            localStorage.removeItem('currentDayDataV4');
+            document.querySelectorAll('input[type=range]').forEach(i => i.value = i.id === 'food-input' ? 100 : 0);
+            document.querySelectorAll('input[type=checkbox]').forEach(i => i.checked = false);
         }
-        localStorage.setItem('lastSavedDateV3', today);
+        localStorage.setItem('lastSavedDateV4', today);
     }
 
-    function resetInputs() {
-        document.querySelectorAll('input[type=range]').forEach(i => i.value = i.id === 'food-input' ? 100 : 0);
-        document.querySelectorAll('input[type=checkbox]').forEach(i => i.checked = false);
+    function saveState() {
+        const state = {};
+        document.querySelectorAll('input').forEach(i => {
+            state[i.id || i.dataset.key] = i.type === 'checkbox' ? i.checked : i.value;
+        });
+        localStorage.setItem('currentDayDataV4', JSON.stringify(state));
     }
 
-    function calculateGrandTotal() {
-        const categories = [
-            getCategoryAvg('.fitness-input'),
-            parseInt(document.getElementById('work-input').value),
-            getCategoryAvg('.startup-input'),
-            getCategoryAvg('.skill-input'),
-            parseInt(document.getElementById('family-input').value),
-            parseInt(document.getElementById('sleep-input').value),
-            getSuppPercentage(),
-            parseInt(document.getElementById('food-input').value)
-        ];
-        return Math.round(categories.reduce((a, b) => a + b, 0) / categories.length);
+    function loadSavedState() {
+        const saved = JSON.parse(localStorage.getItem('currentDayDataV4'));
+        if (!saved) return;
+        document.querySelectorAll('input').forEach(i => {
+            const val = saved[i.id || i.dataset.key];
+            if (val !== undefined) {
+                if (i.type === 'checkbox') i.checked = val;
+                else i.value = val;
+            }
+        });
     }
 
+    // --- SYNC FUNCTIONS ---
+    function exportData() {
+        const data = {
+            history: history,
+            current: JSON.parse(localStorage.getItem('currentDayDataV4')),
+            lastDate: localStorage.getItem('lastSavedDateV4')
+        };
+        const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+    }
+
+    function importData(event) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = JSON.parse(e.target.result);
+            localStorage.setItem('trackerHistoryV4', JSON.stringify(data.history));
+            localStorage.setItem('currentDayDataV4', JSON.stringify(data.current));
+            localStorage.setItem('lastSavedDateV4', data.lastDate);
+            location.reload();
+        };
+        reader.readAsText(event.target.files[0]);
+    }
+
+    // --- CALCS & UI ---
     function getCategoryAvg(selector) {
         const inputs = document.querySelectorAll(selector);
         let sum = 0;
@@ -321,59 +292,42 @@
         return Math.round((checked / checks.length) * 100);
     }
 
+    function calculateGrandTotal() {
+        const cats = [
+            getCategoryAvg('.fitness-input'),
+            parseInt(document.getElementById('work-input').value),
+            getCategoryAvg('.startup-input'),
+            getCategoryAvg('.skill-input'),
+            parseInt(document.getElementById('family-input').value),
+            parseInt(document.getElementById('sleep-input').value),
+            getSuppPercentage(),
+            parseInt(document.getElementById('food-input').value)
+        ];
+        return Math.round(cats.reduce((a, b) => a + b, 0) / cats.length);
+    }
+
     function updateUI() {
         document.querySelectorAll('input[type=range]').forEach(i => {
             if(i.nextElementSibling) i.nextElementSibling.innerText = i.value + "%";
         });
-
         document.getElementById('fitness-total').innerText = getCategoryAvg('.fitness-input') + "%";
         document.getElementById('work-startup-total').innerText = Math.round((parseInt(document.getElementById('work-input').value) + getCategoryAvg('.startup-input'))/2) + "%";
         document.getElementById('skill-total').innerText = getCategoryAvg('.skill-input') + "%";
         document.getElementById('supp-total').innerText = getSuppPercentage() + "%";
-
         saveState();
         refreshCharts();
     }
 
-    function saveState() {
-        const state = {};
-        document.querySelectorAll('input').forEach(i => {
-            state[i.id || i.dataset.key] = i.type === 'checkbox' ? i.checked : i.value;
-        });
-        localStorage.setItem('currentDayDataV3', JSON.stringify(state));
-    }
-
-    function loadSavedState() {
-        const saved = JSON.parse(localStorage.getItem('currentDayDataV3'));
-        if (!saved) return;
-        document.querySelectorAll('input').forEach(i => {
-            const val = saved[i.id || i.dataset.key];
-            if (val !== undefined) {
-                if (i.type === 'checkbox') i.checked = val;
-                else i.value = val;
-            }
-        });
-    }
-
+    // --- CHARTS ---
     function setupCharts() {
         const ctx1 = document.getElementById('weeklyTotalChart').getContext('2d');
         totalChart = new Chart(ctx1, {
             type: 'line',
             data: {
                 labels: history.map(h => h.date.split('/')[0] + '/' + h.date.split('/')[1]),
-                datasets: [{
-                    label: 'This Week',
-                    data: history.map(h => h.score),
-                    borderColor: '#4f46e5',
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
+                datasets: [{ label: 'This Week', data: history.map(h => h.score), borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }]
             },
-            options: { 
-                maintainAspectRatio: false, 
-                scales: { y: { min:0, max:100 }}
-            }
+            options: { maintainAspectRatio: false, scales: { y: { min:0, max:100 }}}
         });
 
         const ctx2 = document.getElementById('categoryChart').getContext('2d');
@@ -381,32 +335,16 @@
             type: 'bar',
             data: {
                 labels: ['Fit', 'Work', 'Start', 'Skill', 'Supps'],
-                datasets: [{
-                    label: 'Today',
-                    data: [0,0,0,0,0],
-                    backgroundColor: ['#818cf8', '#60a5fa', '#34d399', '#fbbf24', '#f87171'],
-                    borderRadius: 8
-                }]
+                datasets: [{ label: 'Today', data: [0,0,0,0,0], backgroundColor: ['#818cf8', '#60a5fa', '#34d399', '#fbbf24', '#f87171'], borderRadius: 8 }]
             },
-            options: { 
-                maintainAspectRatio: false, 
-                plugins: { legend: { display: false }},
-                scales: { y: { min: 0, max: 100 }}
-            }
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false }}, scales: { y: { min: 0, max: 100 }}}
         });
     }
 
     function refreshCharts() {
         if (!categoryChart) return;
-        categoryChart.data.datasets[0].data = [
-            getCategoryAvg('.fitness-input'),
-            parseInt(document.getElementById('work-input').value),
-            getCategoryAvg('.startup-input'),
-            getCategoryAvg('.skill-input'),
-            getSuppPercentage()
-        ];
+        categoryChart.data.datasets[0].data = [getCategoryAvg('.fitness-input'), parseInt(document.getElementById('work-input').value), getCategoryAvg('.startup-input'), getCategoryAvg('.skill-input'), getSuppPercentage()];
         categoryChart.update();
-
         totalChart.data.labels = history.map(h => h.date.split('/')[0] + '/' + h.date.split('/')[1]);
         totalChart.data.datasets[0].data = history.map(h => h.score);
         totalChart.update();
@@ -414,9 +352,7 @@
 
     document.querySelectorAll('input').forEach(i => i.addEventListener('input', updateUI));
     setInterval(checkDateRefresh, 60000);
-
     init();
 </script>
-
 </body>
 </html>
