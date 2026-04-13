@@ -53,10 +53,7 @@
             font-size: 0.9rem;
         }
 
-        .sync-buttons {
-            display: flex;
-            gap: 10px;
-        }
+        .sync-buttons { display: flex; gap: 10px; }
 
         .btn {
             padding: 6px 12px;
@@ -124,7 +121,7 @@
             font-size: 0.85rem;
             font-weight: 700;
             color: var(--primary);
-            min-width: 40px;
+            min-width: 45px;
             text-align: right;
         }
 
@@ -186,7 +183,11 @@
         <div class="card">
             <h2>Lifestyle <span id="life-total" class="overall-badge">0%</span></h2>
             <div class="task-row"><span>Family Time (2h)</span><input type="range" class="life-input" id="family-input" value="0"><span class="perc-val">0%</span></div>
-            <div class="task-row"><span>Sleep (7h)</span><input type="range" class="life-input" id="sleep-input" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row">
+                <span>Sleep (7h Target)</span>
+                <input type="range" class="life-input" id="sleep-input" min="0" max="7" step="0.5" value="0">
+                <span class="perc-val" id="sleep-label">0h</span>
+            </div>
             <div class="task-row"><span>Food Quality</span><input type="range" class="life-input" id="food-input" value="100"><span class="perc-val">100%</span></div>
         </div>
 
@@ -205,7 +206,7 @@
 </div>
 
 <script>
-    let history = JSON.parse(localStorage.getItem('trackerHistoryV5')) || [];
+    let history = JSON.parse(localStorage.getItem('trackerHistoryV6')) || [];
     let totalChart, categoryChart;
 
     function init() {
@@ -216,18 +217,22 @@
         updateUI();
     }
 
+    // Storage logic
     function checkDateRefresh() {
-        const lastDate = localStorage.getItem('lastSavedDateV5');
+        const lastDate = localStorage.getItem('lastSavedDateV6');
         const today = new Date().toLocaleDateString();
         if (lastDate && lastDate !== today) {
             history.push({ date: lastDate, score: calculateGrandTotal() });
             if (history.length > 7) history.shift();
-            localStorage.setItem('trackerHistoryV5', JSON.stringify(history));
-            localStorage.removeItem('currentDayDataV5');
-            document.querySelectorAll('input[type=range]').forEach(i => i.value = i.id === 'food-input' ? 100 : 0);
+            localStorage.setItem('trackerHistoryV6', JSON.stringify(history));
+            localStorage.removeItem('currentDayDataV6');
+            document.querySelectorAll('input[type=range]').forEach(i => {
+                if(i.id === 'food-input') i.value = 100;
+                else i.value = 0;
+            });
             document.querySelectorAll('input[type=checkbox]').forEach(i => i.checked = false);
         }
-        localStorage.setItem('lastSavedDateV5', today);
+        localStorage.setItem('lastSavedDateV6', today);
     }
 
     function saveState() {
@@ -235,11 +240,11 @@
         document.querySelectorAll('input').forEach(i => {
             state[i.id || i.dataset.key] = i.type === 'checkbox' ? i.checked : i.value;
         });
-        localStorage.setItem('currentDayDataV5', JSON.stringify(state));
+        localStorage.setItem('currentDayDataV6', JSON.stringify(state));
     }
 
     function loadSavedState() {
-        const saved = JSON.parse(localStorage.getItem('currentDayDataV5'));
+        const saved = JSON.parse(localStorage.getItem('currentDayDataV6'));
         if (!saved) return;
         document.querySelectorAll('input').forEach(i => {
             const val = saved[i.id || i.dataset.key];
@@ -250,8 +255,9 @@
         });
     }
 
+    // Sync
     function exportData() {
-        const data = { history, current: JSON.parse(localStorage.getItem('currentDayDataV5')), lastDate: localStorage.getItem('lastSavedDateV5') };
+        const data = { history, current: JSON.parse(localStorage.getItem('currentDayDataV6')), lastDate: localStorage.getItem('lastSavedDateV6') };
         const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -263,18 +269,26 @@
         const reader = new FileReader();
         reader.onload = (e) => {
             const data = JSON.parse(e.target.result);
-            localStorage.setItem('trackerHistoryV5', JSON.stringify(data.history));
-            localStorage.setItem('currentDayDataV5', JSON.stringify(data.current));
-            localStorage.setItem('lastSavedDateV5', data.lastDate);
+            localStorage.setItem('trackerHistoryV6', JSON.stringify(data.history));
+            localStorage.setItem('currentDayDataV6', JSON.stringify(data.current));
+            localStorage.setItem('lastSavedDateV6', data.lastDate);
             location.reload();
         };
         reader.readAsText(event.target.files[0]);
     }
 
+    // Calculations
     function getCategoryAvg(selector) {
         const inputs = document.querySelectorAll(selector);
         let sum = 0;
-        inputs.forEach(i => sum += parseInt(i.value));
+        inputs.forEach(i => {
+            if (i.id === 'sleep-input') {
+                // Background calculation: Convert hours to percentage (Max 7h = 100%)
+                sum += (parseFloat(i.value) / 7) * 100;
+            } else {
+                sum += parseInt(i.value);
+            }
+        });
         return Math.round(sum / (inputs.length || 1));
     }
 
@@ -298,17 +312,26 @@
 
     function updateUI() {
         document.querySelectorAll('input[type=range]').forEach(i => {
-            if(i.nextElementSibling) i.nextElementSibling.innerText = i.value + "%";
+            if(i.nextElementSibling) {
+                if (i.id === 'sleep-input') {
+                    i.nextElementSibling.innerText = i.value + "h";
+                } else {
+                    i.nextElementSibling.innerText = i.value + "%";
+                }
+            }
         });
+
         document.getElementById('fitness-total').innerText = getCategoryAvg('.fitness-input') + "%";
         document.getElementById('work-startup-total').innerText = Math.round((parseInt(document.getElementById('work-input').value) + getCategoryAvg('.startup-input'))/2) + "%";
         document.getElementById('skill-total').innerText = getCategoryAvg('.skill-input') + "%";
         document.getElementById('life-total').innerText = getCategoryAvg('.life-input') + "%";
         document.getElementById('supp-total').innerText = getSuppPercentage() + "%";
+        
         saveState();
         refreshCharts();
     }
 
+    // Charts
     function setupCharts() {
         const ctx1 = document.getElementById('weeklyTotalChart').getContext('2d');
         totalChart = new Chart(ctx1, {
