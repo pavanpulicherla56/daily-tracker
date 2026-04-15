@@ -147,8 +147,8 @@
         <div class="header-top">
             <div class="date-badge" id="current-date">--</div>
             <div class="sync-buttons">
-                <button class="btn btn-export" onclick="exportData()">Export Data</button>
-                <button class="btn btn-import" onclick="document.getElementById('importFile').click()">Import Data</button>
+                <button class="btn btn-export" onclick="exportData()">Export</button>
+                <button class="btn btn-import" onclick="document.getElementById('importFile').click()">Import</button>
                 <input type="file" id="importFile" style="display:none" onchange="importData(event)">
             </div>
         </div>
@@ -168,10 +168,10 @@
         </div>
 
         <div class="card">
-            <h2>Work & Startup <span id="work-startup-total" class="overall-badge">0%</span></h2>
+            <h2>Work & Project <span id="work-Project-total" class="overall-badge">0%</span></h2>
             <div class="task-row"><span>Work Progress</span><input type="range" id="work-input" value="0"><span class="perc-val">0%</span></div>
-            <div class="task-row" style="margin-top:10px; border-top: 1px solid var(--border); padding-top:15px;"><span>Startup: Hanu</span><input type="range" class="startup-input" data-key="st_hanu" value="0"><span class="perc-val">0%</span></div>
-            <div class="task-row"><span>Startup: Setu</span><input type="range" class="startup-input" data-key="st_setu" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row" style="margin-top:10px; border-top: 1px solid var(--border); padding-top:15px;"><span>Project: Hanu</span><input type="range" class="Project-input" data-key="st_hanu" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row"><span>Project: Setu</span><input type="range" class="Project-input" data-key="st_setu" value="0"><span class="perc-val">0%</span></div>
         </div>
 
         <div class="card">
@@ -188,7 +188,7 @@
                 <input type="range" class="life-input" id="sleep-input" min="0" max="7" step="0.5" value="0">
                 <span class="perc-val" id="sleep-label">0h</span>
             </div>
-            <div class="task-row"><span>Food Quality</span><input type="range" class="life-input" id="food-input" value="100"><span class="perc-val">100%</span></div>
+            <div class="task-row"><span>Food Quality</span><input type="range" class="life-input" id="food-input" value="0"><span class="perc-val">0%</span></div>
         </div>
 
         <div class="card">
@@ -206,48 +206,63 @@
 </div>
 
 <script>
-    let history = JSON.parse(localStorage.getItem('trackerHistoryV6')) || [];
+    // Stable storage key (won't change)
+    const STORAGE_KEY = 'EliteTrackerData_Final';
+    
+    let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+        history: [],
+        current: {},
+        lastDate: new Date().toLocaleDateString()
+    };
+
     let totalChart, categoryChart;
 
     function init() {
         document.getElementById('current-date').innerText = new Date().toDateString();
         checkDateRefresh();
         setupCharts();
-        loadSavedState();
+        loadState();
         updateUI();
     }
 
-    // Storage logic
     function checkDateRefresh() {
-        const lastDate = localStorage.getItem('lastSavedDateV6');
         const today = new Date().toLocaleDateString();
-        if (lastDate && lastDate !== today) {
-            history.push({ date: lastDate, score: calculateGrandTotal() });
-            if (history.length > 7) history.shift();
-            localStorage.setItem('trackerHistoryV6', JSON.stringify(history));
-            localStorage.removeItem('currentDayDataV6');
-            document.querySelectorAll('input[type=range]').forEach(i => {
-                if(i.id === 'food-input') i.value = 100;
-                else i.value = 0;
-            });
-            document.querySelectorAll('input[type=checkbox]').forEach(i => i.checked = false);
+        if (appData.lastDate !== today) {
+            // Save yesterday's score to history
+            const dailyScore = calculateGrandTotal();
+            appData.history.push({ date: appData.lastDate, score: dailyScore });
+            
+            // Keep only last 7 days
+            if (appData.history.length > 7) appData.history.shift();
+            
+            // Reset daily progress
+            appData.current = {};
+            appData.lastDate = today;
+            
+            saveToStorage();
+            resetInputs();
         }
-        localStorage.setItem('lastSavedDateV6', today);
+    }
+
+    function resetInputs() {
+        document.querySelectorAll('input[type=range]').forEach(i => i.value = 0);
+        document.querySelectorAll('input[type=checkbox]').forEach(i => i.checked = false);
+    }
+
+    function saveToStorage() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
     }
 
     function saveState() {
-        const state = {};
         document.querySelectorAll('input').forEach(i => {
-            state[i.id || i.dataset.key] = i.type === 'checkbox' ? i.checked : i.value;
+            appData.current[i.id || i.dataset.key] = i.type === 'checkbox' ? i.checked : i.value;
         });
-        localStorage.setItem('currentDayDataV6', JSON.stringify(state));
+        saveToStorage();
     }
 
-    function loadSavedState() {
-        const saved = JSON.parse(localStorage.getItem('currentDayDataV6'));
-        if (!saved) return;
+    function loadState() {
         document.querySelectorAll('input').forEach(i => {
-            const val = saved[i.id || i.dataset.key];
+            const val = appData.current[i.id || i.dataset.key];
             if (val !== undefined) {
                 if (i.type === 'checkbox') i.checked = val;
                 else i.value = val;
@@ -257,21 +272,18 @@
 
     // Sync
     function exportData() {
-        const data = { history, current: JSON.parse(localStorage.getItem('currentDayDataV6')), lastDate: localStorage.getItem('lastSavedDateV6') };
-        const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+        const blob = new Blob([JSON.stringify(appData)], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `tracker-sync-${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
     }
 
     function importData(event) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            const data = JSON.parse(e.target.result);
-            localStorage.setItem('trackerHistoryV6', JSON.stringify(data.history));
-            localStorage.setItem('currentDayDataV6', JSON.stringify(data.current));
-            localStorage.setItem('lastSavedDateV6', data.lastDate);
+            appData = JSON.parse(e.target.result);
+            saveToStorage();
             location.reload();
         };
         reader.readAsText(event.target.files[0]);
@@ -282,12 +294,8 @@
         const inputs = document.querySelectorAll(selector);
         let sum = 0;
         inputs.forEach(i => {
-            if (i.id === 'sleep-input') {
-                // Background calculation: Convert hours to percentage (Max 7h = 100%)
-                sum += (parseFloat(i.value) / 7) * 100;
-            } else {
-                sum += parseInt(i.value);
-            }
+            if (i.id === 'sleep-input') sum += (parseFloat(i.value) / 7) * 100;
+            else sum += parseInt(i.value);
         });
         return Math.round(sum / (inputs.length || 1));
     }
@@ -302,7 +310,7 @@
         const cats = [
             getCategoryAvg('.fitness-input'),
             parseInt(document.getElementById('work-input').value),
-            getCategoryAvg('.startup-input'),
+            getCategoryAvg('.Project-input'),
             getCategoryAvg('.skill-input'),
             getCategoryAvg('.life-input'),
             getSuppPercentage()
@@ -313,16 +321,12 @@
     function updateUI() {
         document.querySelectorAll('input[type=range]').forEach(i => {
             if(i.nextElementSibling) {
-                if (i.id === 'sleep-input') {
-                    i.nextElementSibling.innerText = i.value + "h";
-                } else {
-                    i.nextElementSibling.innerText = i.value + "%";
-                }
+                i.nextElementSibling.innerText = (i.id === 'sleep-input') ? i.value + "h" : i.value + "%";
             }
         });
 
         document.getElementById('fitness-total').innerText = getCategoryAvg('.fitness-input') + "%";
-        document.getElementById('work-startup-total').innerText = Math.round((parseInt(document.getElementById('work-input').value) + getCategoryAvg('.startup-input'))/2) + "%";
+        document.getElementById('work-Project-total').innerText = Math.round((parseInt(document.getElementById('work-input').value) + getCategoryAvg('.Project-input'))/2) + "%";
         document.getElementById('skill-total').innerText = getCategoryAvg('.skill-input') + "%";
         document.getElementById('life-total').innerText = getCategoryAvg('.life-input') + "%";
         document.getElementById('supp-total').innerText = getSuppPercentage() + "%";
@@ -337,8 +341,8 @@
         totalChart = new Chart(ctx1, {
             type: 'line',
             data: {
-                labels: history.map(h => h.date.split('/')[0] + '/' + h.date.split('/')[1]),
-                datasets: [{ label: 'This Week', data: history.map(h => h.score), borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }]
+                labels: appData.history.map(h => h.date.split('/')[0] + '/' + h.date.split('/')[1]),
+                datasets: [{ label: 'This Week', data: appData.history.map(h => h.score), borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }]
             },
             options: { maintainAspectRatio: false, scales: { y: { min:0, max:100 }}}
         });
@@ -359,14 +363,14 @@
         categoryChart.data.datasets[0].data = [
             getCategoryAvg('.fitness-input'), 
             parseInt(document.getElementById('work-input').value), 
-            getCategoryAvg('.startup-input'), 
+            getCategoryAvg('.Project-input'), 
             getCategoryAvg('.skill-input'), 
             getCategoryAvg('.life-input'),
             getSuppPercentage()
         ];
         categoryChart.update();
-        totalChart.data.labels = history.map(h => h.date.split('/')[0] + '/' + h.date.split('/')[1]);
-        totalChart.data.datasets[0].data = history.map(h => h.score);
+        totalChart.data.labels = appData.history.map(h => h.date.split('/')[0] + '/' + h.date.split('/')[1]);
+        totalChart.data.datasets[0].data = appData.history.map(h => h.score);
         totalChart.update();
     }
 
