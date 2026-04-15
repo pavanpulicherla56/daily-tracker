@@ -23,8 +23,8 @@
             background-attachment: fixed;
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
-            line-height: 1.5;
+            padding: 12px;
+            line-height: 1.3;
             min-height: 100vh;
         }
 
@@ -32,10 +32,10 @@
 
         header {
             background: var(--card-bg);
-            padding: 24px;
-            border-radius: 20px;
+            padding: 16px; 
+            border-radius: 18px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            margin-bottom: 24px;
+            margin-bottom: 15px;
             border: 1px solid rgba(255,255,255,0.3);
         }
 
@@ -43,25 +43,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         .date-badge {
             background: #eef2ff;
             color: var(--primary-dark);
-            padding: 8px 18px;
-            border-radius: 12px;
+            padding: 4px 14px;
+            border-radius: 10px;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             letter-spacing: 0.5px;
         }
 
-        .sync-buttons { display: flex; gap: 12px; }
+        .sync-buttons { display: flex; gap: 8px; }
 
         .btn {
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 0.85rem;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
             cursor: pointer;
             border: 1px solid var(--border);
             font-weight: 600;
@@ -70,32 +70,30 @@
 
         .btn-export { background: #fff; color: var(--text-main); }
         .btn-import { background: var(--primary); color: #fff; border: none; }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
         .charts-grid {
             display: grid;
             grid-template-columns: 1.6fr 1fr;
-            gap: 24px;
+            gap: 15px;
         }
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+            gap: 12px;
         }
 
         .card {
             background: var(--card-bg);
-            padding: 22px;
-            border-radius: 20px;
+            padding: 14px 20px; 
+            border-radius: 18px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border: 1px solid rgba(255,255,255,0.2);
-            transition: transform 0.2s ease;
         }
 
         h2 {
-            margin: 0 0 18px 0;
-            font-size: 1.15rem;
+            margin: 0 0 10px 0;
+            font-size: 1.05rem;
             font-weight: 800;
             color: #0f172a;
             display: flex;
@@ -106,50 +104,50 @@
         .overall-badge {
             background: var(--success);
             color: white;
-            padding: 3px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
+            padding: 1px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
         }
 
         .task-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 0;
+            padding: 7px 0; 
             border-bottom: 1px solid #f1f5f9;
+            font-size: 0.88rem;
         }
 
         .task-row:last-child { border-bottom: none; }
 
-        input[type="range"] { width: 130px; accent-color: var(--primary); cursor: pointer; }
-        input[type="checkbox"] { width: 19px; height: 19px; accent-color: var(--success); cursor: pointer; }
+        input[type="range"] { width: 110px; accent-color: var(--primary); cursor: pointer; }
+        input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--success); cursor: pointer; }
 
         .perc-val {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 700;
             color: var(--primary-dark);
-            min-width: 50px;
+            min-width: 40px;
             text-align: right;
         }
 
-        .supp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .supp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 
         .supp-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 0.85rem;
+            gap: 6px;
+            font-size: 0.78rem;
             background: #f8fafc;
-            padding: 10px;
-            border-radius: 10px;
+            padding: 6px;
+            border-radius: 8px;
             border: 1px solid #f1f5f9;
         }
 
         .water-section {
             border-top: 1px solid var(--border);
-            padding-top: 15px;
-            margin-top: 5px;
+            padding-top: 8px;
+            margin-top: 2px;
         }
 
         @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }
@@ -162,30 +160,22 @@
         <div class="header-top">
             <div class="date-badge" id="current-date">--</div>
             <div class="sync-buttons">
-                <button class="btn btn-export" onclick="exportData()">Export Backup</button>
-                <button class="btn btn-import" onclick="document.getElementById('importFile').click()">Import Sync</button>
+                <button class="btn btn-export" onclick="exportData()">Export</button>
+                <button class="btn btn-import" onclick="document.getElementById('importFile').click()">Import</button>
                 <input type="file" id="importFile" style="display:none" onchange="importData(event)">
             </div>
         </div>
         <div class="charts-grid">
-            <div style="height: 230px;"><canvas id="weeklyTotalChart"></canvas></div>
-            <div style="height: 230px;"><canvas id="categoryChart"></canvas></div>
+            <div style="height: 180px;"><canvas id="weeklyTotalChart"></canvas></div>
+            <div style="height: 180px;"><canvas id="categoryChart"></canvas></div>
         </div>
     </header>
 
     <div class="dashboard-grid">
         <div class="card">
-            <h2>Fitness <span id="fitness-total" class="overall-badge">0%</span></h2>
-            <div class="task-row"><span>Focus Exercises</span><input type="range" class="fitness-input" data-key="fit_focus" value="0"><span class="perc-val">0%</span></div>
-            <div class="task-row"><span>Growth Addition</span><input type="range" class="fitness-input" data-key="fit_growth" value="0"><span class="perc-val">0%</span></div>
-            <div class="task-row"><span>Abs</span><input type="range" class="fitness-input" data-key="fit_abs" value="0"><span class="perc-val">0%</span></div>
-            <div class="task-row"><span>10k Steps</span><input type="range" class="fitness-input" data-key="fit_steps" value="0"><span class="perc-val">0%</span></div>
-        </div>
-
-        <div class="card">
             <h2>Work & Projects <span id="work-project-total" class="overall-badge">0%</span></h2>
             <div class="task-row"><span>Core Work</span><input type="range" id="work-input" value="0"><span class="perc-val">0%</span></div>
-            <div class="task-row" style="margin-top:10px; border-top: 2px solid #f1f5f9; padding-top:15px;"><span>Project: Hanu</span><input type="range" class="project-input" data-key="prj_hanu" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row" style="margin-top:6px; border-top: 1.5px solid #f1f5f9; padding-top:10px;"><span>Project: Hanu</span><input type="range" class="project-input" data-key="prj_hanu" value="0"><span class="perc-val">0%</span></div>
             <div class="task-row"><span>Project: Setu</span><input type="range" class="project-input" data-key="prj_setu" value="0"><span class="perc-val">0%</span></div>
         </div>
 
@@ -203,13 +193,21 @@
         </div>
 
         <div class="card">
+            <h2>Fitness <span id="fitness-total" class="overall-badge">0%</span></h2>
+            <div class="task-row"><span>Focus Exercises</span><input type="range" class="fitness-input" data-key="fit_focus" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row"><span>Growth Addition</span><input type="range" class="fitness-input" data-key="fit_growth" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row"><span>Abs</span><input type="range" class="fitness-input" data-key="fit_abs" value="0"><span class="perc-val">0%</span></div>
+            <div class="task-row"><span>10k Steps</span><input type="range" class="fitness-input" data-key="fit_steps" value="0"><span class="perc-val">0%</span></div>
+        </div>
+
+        <div class="card">
             <h2>Health & Supps <span id="supp-total" class="overall-badge">0%</span></h2>
             <div class="supp-grid">
                 <label class="supp-item"><input type="checkbox" class="supp-check" data-key="sup_creatine"> Creatine</label>
                 <label class="supp-item"><input type="checkbox" class="supp-check" data-key="sup_zma"> ZMA</label>
                 <label class="supp-item"><input type="checkbox" class="supp-check" data-key="sup_omega"> Omega-3</label>
                 <label class="supp-item"><input type="checkbox" class="supp-check" data-key="sup_whey"> Whey</label>
-                <label class="supp-item"><input type="checkbox" class="supp-check" data-key="sup_multi"> Multi Vit</label>
+                <label class="supp-item"><input type="checkbox" class="supp-check" data-key="sup_multi"> Multi</label>
             </div>
             <div class="water-section">
                 <div class="task-row">
@@ -223,7 +221,7 @@
 </div>
 
 <script>
-    const STORAGE_KEY = 'ElitePerformance_v8';
+    const STORAGE_KEY = 'ElitePerformance_v11';
     
     let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
         history: [],
@@ -305,10 +303,8 @@
         const checks = document.querySelectorAll('.supp-check');
         const checkedCount = Array.from(checks).filter(c => c.checked).length;
         const suppPerc = (checkedCount / checks.length) * 100;
-        
         const waterLiters = parseFloat(document.getElementById('water-input').value);
         const waterPerc = (waterLiters / 4) * 100;
-        
         return Math.round((suppPerc + waterPerc) / 2);
     }
 
@@ -349,7 +345,7 @@
             type: 'line',
             data: {
                 labels: appData.history.map(h => h.date.split('/')[0] + '/' + h.date.split('/')[1]),
-                datasets: [{ label: 'Daily Score', data: appData.history.map(h => h.score), borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 4 }]
+                datasets: [{ label: 'Score', data: appData.history.map(h => h.score), borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 2 }]
             },
             options: { maintainAspectRatio: false, scales: { y: { min:0, max:100, grid: { color: '#f1f5f9' }}}}
         });
@@ -358,8 +354,8 @@
         categoryChart = new Chart(ctx2, {
             type: 'bar',
             data: {
-                labels: ['Fit', 'Work', 'Proj', 'Skill', 'Life', 'Health'],
-                datasets: [{ data: [0,0,0,0,0,0], backgroundColor: ['#818cf8', '#60a5fa', '#34d399', '#fbbf24', '#a78bfa', '#f87171'], borderRadius: 6 }]
+                labels: ['Work', 'Proj', 'Skill', 'Life', 'Fit', 'Health'],
+                datasets: [{ data: [0,0,0,0,0,0], backgroundColor: ['#60a5fa', '#34d399', '#fbbf24', '#a78bfa', '#818cf8', '#f87171'], borderRadius: 4 }]
             },
             options: { maintainAspectRatio: false, plugins: { legend: { display: false }}, scales: { y: { min: 0, max: 100, grid: { display: false }}}}
         });
@@ -368,11 +364,11 @@
     function refreshCharts() {
         if (!categoryChart) return;
         categoryChart.data.datasets[0].data = [
-            getCategoryAvg('.fitness-input'), 
             parseInt(document.getElementById('work-input').value), 
             getCategoryAvg('.project-input'), 
             getCategoryAvg('.skill-input'), 
             getCategoryAvg('.life-input'),
+            getCategoryAvg('.fitness-input'),
             getHealthScore()
         ];
         categoryChart.update();
